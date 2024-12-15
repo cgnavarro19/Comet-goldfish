@@ -1,0 +1,252 @@
+---
+title: "**Variables influyentes en la predictavilidad de la longevidad del pez cometa dorado**"
+author: "Claudia García Navarro, Jose G. Saiz Camacho"
+date: "2024-12-16"
+output:
+  html_document:
+    toc: true
+bibliography: ["zotero.bib", "libraries.bib", "peces.bib"]
+link-citations: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **1. Introducción**
+
+### 1.1 Contextualización ecológica del *Carassius Auratus*
+
+El pez dorado es originario de Asia central y oriental. A pesar de la creencia de que no retienen información a largo plazo, son capaces de hacerlo durante al menos más de un mes.
+Tiene un tamaño medio de 20 cm y suele vivir cerca de los 35 años.
+Su dieta es omnívora, no es un animal territorial, es diurno y además suele vivir en pequeño grupos.
+Se trata de una especie ovípara que desova en aguas abiertas.
+
+
+### 1.1.1 Morfología
+
+Su cuerpo es alargado, presenta dos aletas pectorales, otras dos ventrales y una trasera más ancha.  
+Su fenotipo puede albergar colores como negro, naranja, rojo, amarillo, blanco, plata…
+Tiene un tamaño medio de 20 cm
+
+### 1.1.1.2 Dimorfismo
+Macho: suele ser más pequeño y delgado y su parte trasera está más hundida que en las hembras. Además las aletas pectorales y branquias presentan manchas blancas 
+
+Hembra: suelen tener mayor tamaño y peso, además el orificio anal sobresale más que en los machos.
+
+### 1.1.2 Etología
+Para iniciar el apareamiento, el macho golpea con su cabeza la parte inferior de la hembra para estimular a la hembra a que ovule y expulse los huevos.
+
+
+Se nota cuando está gestando cuando se nota el bulto en la aleta trasera
+Suele alimentarse en los fondos de las aguas lentas, removiendo el lodo y los sedimentos. Esto aumenta la turbidez, provocando que el agua se encuentre más caliente y menos oxigenada.
+
+
+## **2. Objetivo**
+
+El objetivo de este proyecto es analizar, mediante las variables obtenidas, si las hipótesis planteadas son ciertas y cuál es su grado de fiabilidad.
+
+## **3. Hipótesis**
+
+En base a los datos proporcionados, planteamos las siguientes hipótesis:
+
+- **Hipótesis sobre la interacción entre el color del Comet goldfish y su longevidad**: El Comet goldfish de colores más brillantes, como el rojo o el naranja, tienen una esperanza de vida más corta que aquellos con colores más apagados o menos intensos. Los peces que presentan manchas tienen una mayor longevidad.
+
+
+- **Hipótesis sobre la longevidad en relación con el tipo de habitat**: Los Comet goldfish en lagos grandes tienen una esperanza de vida más larga que aquellos en espacios más pequeños como charcas.
+
+- **Hipótesis sobre la longevidad en los ríos y el pez color cálico**: En los ríos hay mayor longevidad debido a una mayor presencia de peces color cálico
+
+<center>
+![](C:/Users/joses/Desktop/pezcalico.jpg){width="400" height="400"}  
+</center>
+*Figura 1*: *Calico comet goldfish*.
+
+
+
+## **4. Materiales y Métodos**
+
+### 4.1 Datos
+
+Los datos de este proyecto fueron descargados desde Kaggle [@kaggle_comet_goldfish] Estos datos muestran diversas variables independientes que recogen información sobre esta especie.
+
+
+
+Para llevar a cabo el análisis utilizamos R [@R-base] con las librerias dplyr [@R-dplyr] y ggplot [@R-ggplot2; @ggplot22016]. Para la creación de este informe hemos utilizado el paquete knitr [@R-knitr; @knitr2015; @knitr2014] y pandoc y para crear PDFs tinytex [@tinytex2019]
+
+
+```{r cargar-librerias, echo=FALSE, warning=FALSE, message=FALSE}
+library('dplyr')
+library('ggplot2')
+library("knitr")
+```
+
+
+
+```{r leer-datos, echo=FALSE}
+mydata <- read.csv("fish_data.csv", row.names = NULL)
+```
+
+
+\newpage
+
+
+```{r, renombrar datos, echo = FALSE}
+mydata <- mydata %>% rename(`Average length (in.)` = average_length.inches..)
+```
+
+```{r, renombrar datos habitat, echo = FALSE}
+mydata <- mydata %>% rename(`Habitat` = habitat)
+```
+
+```{r, renombrar datos pH, echo = FALSE}
+mydata <- mydata %>% rename(`Water pH` = ph_of_water)
+```
+
+```{r, renombrar datos peso, echo = FALSE}
+mydata <- mydata %>% rename(`Average weight (in.)` = average_weight.inches..)
+```
+
+```{r, renombrar datos color, echo = FALSE}
+mydata <- mydata %>% rename(`Color` = color)
+```
+
+```{r, renombrar datos life span, echo = FALSE}
+mydata <- mydata %>% rename(`Life span` = life_span)
+```
+
+```{r vista-datos, echo=FALSE}
+knitr::kable(head(mydata, 10), align = 'c', caption = "Tabla 1: Diez primeras filas")
+```
+Los datos tienen `r nrow(mydata)` entradas. 
+
+
+### 4.2 Filtrado de datos
+
+A continuación, eliminamos datos NA, por su irrelevancia, utilizando el siguiente código:
+
+```{r, echo=TRUE}
+datos_limpios <- na.omit(mydata)
+```
+
+### 4.3 Justificación
+
+Para escribir la introducción de este proyecto hemos comprobado los datos encontrados sobre el pez descrito con los datos proporcionados. De tal forma, hemos calculado la media de longevidad de los individuos y la media de su longitud.
+
+```{r, echo=FALSE}
+mydata %>% summarise(media_Life_span = mean(`Life span`)) %>% kable()
+```
+```{r, echo=FALSE}
+mydata %>% summarise(media_length = mean(`Average length (in.)`)) %>% kable()
+```
+ Tras esto, hemos seleccionado los datos únicos tanto del color de los peces como del hábitat. 
+Así, obtuvimos una primera idea del animal con el que estábamos trabajando.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+mydata %>% summarise(unique(Habitat)) %>% kable()
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+mydata %>% summarise(unique(Color)) %>% kable()
+```
+
+
+### 4.4 Comprobación de hipótesis
+
+- Hipótesis 1:
+
+Al representar los datos del color de los peces frente a su longevidad, podemos observar que el pez más longevo es el de color “cálico”. Su color críptico diseñado específicamente para los ambientes donde suele habitar le permite ser menos distinguible para aquellos depredadores que suponen una amenaza para esta especie. En la hipótesis 3 se espera que este sea el color de pez más abundante debido a la presión evolutiva.
+
+```{r, echo=FALSE}
+ggplot(datos_limpios, aes(x = Color, y = `Life span`)) +
+  geom_violin(fill = "lightgreen", color = "darkgreen") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Distribución de la longevidad de los peces por color", x = "Color", y = "Longevidad (años)") 
+```
+
+```{r colores total, echo=FALSE}
+conteo_colores <- table(datos_limpios$Color) %>%as.data.frame()
+```
+
+
+- Hipótesis 2:
+
+En esta gráfica hemos representado el tipo de hábitat frente a la longevidad y hemos obtenido que los ríos son los lugares en el que los peces suelen tener un mayor bienestar y alcanzar altas edades. Este resultado podría deberse a que el agua está en movimiento, pudiendo tener ellos distintas zonas lo suficientemente separadas como para desarrollar diferentes funciones, como pueden ser el desove, pasar la etapa juvenil,la alimentación, etc. pudiendo así encontrar zonas seguras ante depredadores.
+
+Además, que las zonas en calma sean en las que hay menor longevidad, refuerza nuestra hipótesis.
+
+
+```{r, echo=FALSE}
+colores <- colorRampPalette(c("lightblue","blue"))
+```
+
+```{r, echo=FALSE}
+ggplot(datos_limpios, aes(x = Habitat, y = `Life span`)) +
+  geom_boxplot(fill = colores(5), color = "black") +
+  labs(title = "Longevidad de los peces por hábitat", x= "Hábitat", y= "Longevidad (años)") +
+  theme_get() 
+```
+
+- Hipótesis 3:
+
+Llegando al punto álgido de nuestro trabajo, podemos darnos cuenta de que la hipótesis final no se cumple. Que los individuos de los ríos presenten mayor longevidad **no** se debe a que el mayor número de individuos sean de color cálico, que, según la hipótesis 1, son los que llegan a más avanzada edad.
+
+```{r resultado, echo=FALSE, warning=FALSE,message=FALSE}
+resultado <- datos_limpios %>%
+  group_by(Habitat, Color) %>%
+  filter(Habitat== "rivers") %>% 
+  summarise(cantidad = n())
+```
+
+```{r, echo=FALSE}
+kable(resultado)
+```
+
+
+## **5. Resultados**
+
+```{r resultadofinal, echo=FALSE, warning=FALSE,message=FALSE}
+resultadofinal <- datos_limpios %>%
+  group_by(Habitat, Color) %>%
+  summarise(cantidad = n())
+```
+
+En esta gráfica mostramos las frecuencias de los peces de cada color agrupados según el hábitat donde viven y podemos ver cómo el pez de color cálico no es el que más habita en los ríos ni en ninguno de los hábitats descritos. De hecho, ocurre todo lo contrario, los peces más llamativos como son los de colores rojos/anaranjados son los más abundantes en todos los ecosistemas, a pesar de ser, según la teoría, los más depredados por sus colores brillantes.
+
+Este conflicto entre tasa de supervivencia, color y hábitat puede deberse a la intervención humana, ya que son peces que de forma muy común se encuentran en las peceras de muchos aficionados a la acuariofilia, que terminan introducidos en lagos y estanques.
+
+
+```{r gráfico resultado, echo=FALSE}
+ggplot(resultadofinal, aes(x = Habitat, y = cantidad, fill = Color)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.9) +
+  labs(title = "Número de Peces por Color y Hábitat",
+       x = "Hábitat",
+       y = "Cantidad de Peces") +
+  theme_light()
+```
+
+
+
+## **6. Conclusión**
+
+Este análisis muestra que el color cálico en los peces cometa dorada se caracteriza por tener una mayor esperanza de vida en los individios que muestran ese fenotipo. A su vez, se concluye que los peces que habitan en ríos tienen mayor esperanza de vida que aquellos peces de hábitats como lagos o charcas.
+
+A pesar de que los individios de ríos se caracterizan por presentar mayor longevidad, los cálicos no son los mayoritarios en este hábitat.
+
+
+
+## **7. Información de la sesión y referencias**
+
+```{r sessionInfo, echo=FALSE}
+session <- sessionInfo()
+print(session)
+```
+
+
+## **8. Bibliografía**
+
+
+
+
+
